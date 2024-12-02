@@ -6,7 +6,7 @@
 
 # *Problem Statement:*
 
-*CardioLens* – Automated Echocardiogram Segmentation and Report Generation Using Intel Optimized Models
+*CardioLens* – Automated Echocardiogram Segmentation along with Report Generation Using Intel Optimized Models
 
 ---
 
