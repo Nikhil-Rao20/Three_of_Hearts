@@ -11,7 +11,8 @@
 ---
 
 # *Hackathon Details:*
- *Intel® AI Hackathon @ IEEE IndiCon 2024*
+ [*Intel® AI Hackathon @ IEEE IndiCon 2024*](http://ieeeindicon.org/)
+ 
 Intel® AI Hackathon is an AI Readiness focused initiative for next-generation technologists from higher education institutions in India, offering them an opportunity to showcase AI innovation and impact. IEEE and IIT-Kharagpur join hands with Intel to bring this opportunity for students participating in IEEE INDICON 2024, being held at IIT-Kharagpur this year (2024).
 
 
