@@ -54,40 +54,40 @@ The user interface enables healthcare professionals to easily upload Echocardiog
 
 ---
 
-# *Tech Stack:*
+# Tech Stack:
 
-### 1. *Programming Languages:*
+### 1. Programming Languages:
 
-- *Python:* Used for model development, data preprocessing, and integration with AI libraries and frameworks.
+- **Python:** Used for model development, data preprocessing, and integration with AI libraries and frameworks.
 
 ### 2. *Python Libraries Used and it's case scenarios:*
 
-- *Intel Extension for PyTorch (IPEX):* Optimizes PyTorch models for *Intel GPUs, leveraging **oneDNN* for faster training and inference through hardware acceleration and kernel optimizations.
-- *Pytorch and Intel Optimized Pytorch:* Utilized for loading and running pre-trained models, with support for deep learning operations on Intel hardware.
-- *Hugging Face:* For accessing pre-trained models, including those used for image segmentation, and fine-tuning them for specific tasks. We took the Intel DPT Large Model which is pretrained on ADE Dataset.
-- *IPEX:* Used for Optimized training and inference tasks, optimized for Intel architecture.
-- *OpenCV:* For image loading, preprocessing and resizing in the model pipeline, particularly for medical images and video data.
-- *Pandas:* For organizing and managing data, particularly the dataset with patient details and video paths.
-- *NumPy:* For handling numerical data and performing mathematical operations.
-- *Sci-Py:* Used for advanced signal processing operations.
-- *Matplotlib:* Used for visualizing segmentation results, including masks and other outputs from model inference.
-- *Seaborn:* For plotting graphs and displaying results such as performance metrics, inference times, and model accuracy
-- *CUDA:* Leveraged for accelerating model training and inference on compatible *Intel GPUs*.
-- *TorchVision:* For model loading, data augmentation, and utilizing pre-trained models in *PyTorch*.
-- *OS (Python’s os module):* Used for organizing file paths and managing directories for storing model weights, videos, and outputs.
-- *Pathlib:* For managing directories and paths in a cleaner and more structured way.
+- **Intel Extension for PyTorch (IPEX):** Optimizes PyTorch models for Intel GPUs.
+- **Pytorch and Intel Optimized Pytorch:** Utilized for loading and running pre-trained models, with support for deep learning operations on Intel hardware.
+- **Hugging Face:** For accessing pre-trained models, including those used for image segmentation, and fine-tuning them for specific tasks. We took the Intel DPT Large Model which is pretrained on ADE Dataset.
+- **IPEX:** Used for Optimized training and inference tasks, optimized for Intel architecture.
+- **OpenCV:** For image loading, preprocessing and resizing in the model pipeline, particularly for medical images and video data.
+- **Pandas:** For organizing and managing data, particularly the dataset with patient details and video paths.
+- **NumPy:** For handling numerical data and performing mathematical operations.
+- **Sci-Py:** Used for advanced signal processing operations.
+- **Matplotlib:** Used for visualizing segmentation results, including masks and other outputs from model inference.
+- **Seaborn:** For plotting graphs and displaying results such as performance metrics, inference times, and model accuracy
+- **CUDA:** Leveraged for accelerating model training and inference on compatible *Intel GPUs*.
+- **TorchVision:** For model loading, data augmentation, and utilizing pre-trained models in *PyTorch*.
+- **OS (Python’s os module):** Used for organizing file paths and managing directories for storing model weights, videos, and outputs.
+- **Pathlib:** For managing directories and paths in a cleaner and more structured way.
 
 ---
 
-# *What I Learned:*
+# What I Learned:
 
-From this experience, I have gained in-depth knowledge of leveraging *Intel Libraries, and the powerful combination of **Intel hardware acceleration* with *Hugging Face* models for optimized deep learning workflows.
+From this experience, I have gained in-depth knowledge of leveraging Intel Libraries, and the powerful combination of Intel hardware acceleration with Hugging Face models for optimized deep learning workflows.
 
-I learned how to manage and resolve dependency conflicts while setting up essential libraries like *torch, **wget, and **matplotlib, ensuring a robust environment for executing AI models. By utilizing **Intel Extension for PyTorch (IPEX), I enhanced the performance of models running on **Intel CPUs and GPUs*, accelerating training and inference tasks significantly. Handling deprecation warnings, such as replacing the pretrained parameter with weights in PyTorch, helped me stay updated with the latest framework updates and adapt the code to Intel-optimized workflows.
+I learned how to manage and resolve dependency conflicts while setting up essential libraries like torch, wget, and matplotlib, ensuring a robust environment for executing AI models. By utilizing Intel Extension for PyTorch (IPEX), I enhanced the performance of models running on Intel CPUs and GPUs, accelerating training and inference tasks significantly. Handling deprecation warnings, such as replacing the pretrained parameter with weights in PyTorch, helped me stay updated with the latest framework updates and adapt the code to Intel-optimized workflows.
 
-Working with *CUDA* allowed me to leverage hardware acceleration to significantly boost the speed of model training and inference, improving both efficiency and scalability.
+Working with CUDA allowed me to leverage hardware acceleration to significantly boost the speed of model training and inference, improving both efficiency and scalability.
 
-I experimented with *DPT Large model by Intel, DeepLabV3 with ResNet-101 and DeepLabV3 with Mobile-NetV3 Large into the workflow for semantic segmentation, leveraging the pre-trained model from Hugging Face to efficiently segment objects in medical imaging tasks, such as **echocardiogram analysis. By fine-tuning the **DeepLabV3 model* on my dataset, I improved the segmentation accuracy of structures like the left ventricle. Intel’s optimizations allowed me to significantly reduce inference time while maintaining high accuracy, further enhancing the effectiveness of the solution in real-world applications.
+I experimented with DPT Large model by Intel, DeepLabV3 with ResNet-101 and DeepLabV3 with Mobile-NetV3 Large into the workflow for semantic segmentation, leveraging the pre-trained model from Hugging Face to efficiently segment objects in medical imaging tasks, such as echocardiogram analysis. By fine-tuning the DeepLabV3 model on my dataset, I improved the segmentation accuracy of structures like the left ventricle. Intel’s optimizations allowed me to significantly reduce inference time while maintaining high accuracy, further enhancing the effectiveness of the solution in real-world applications.
 | Type                      | DPT Model | DeepLabv3 ResNet101 | DeepLabv3 MobileNetV3 |
 |---------------------------|-----------|---------------------|-----------------------|
 | *Loss*                  | 0.1419    | 0.0441              | 0.053                 |
@@ -97,11 +97,11 @@ I experimented with *DPT Large model by Intel, DeepLabV3 with ResNet-101 and Dee
 | *Time for 1 Epoch (in Sec)*      | 223.613   | 7.064               | 6.6460                |
 
 
-Furthermore, I enhanced my expertise in video segmentation, using *Intel's threading and memory management capabilities* to improve *data transfer speed* and *CPU utilization* for high-performance tasks. By managing output data such as *segmentation masks* and *heartbeat cycle videos* using Python’s os and pathlib modules, I optimized the storage of these results. This structured organization streamlined workflows, making it easier to track outputs and maintain reproducibility across experiments.
+Furthermore, I enhanced my expertise in video segmentation, using Intel's threading and memory management capabilities to improve data transfer speed and CPU utilization for high-performance tasks. By managing output data such as segmentation masks and heartbeat cycle videos using Python’s os and pathlib modules, I optimized the storage of these results. This structured organization streamlined workflows, making it easier to track outputs and maintain reproducibility across experiments.
 
-I worked on optimizing *multiprocessing* and *parallelization* for data handling, resolving issues like *semaphore locks* and *bad file descriptors* when scaling up inference tasks. This experience deepened my understanding of *Python’s threading and multiprocessing* modules and their application in real-time data processing. Moreover, by integrating *Hugging Face* models with Intel's hardware and software stack, I gained insights into using pre-trained models for efficient inference, ultimately enhancing model performance while using Intel’s powerful AI tools.
+I worked on optimizing multiprocessing and parallelization for data handling, resolving issues like semaphore locks and bad file descriptors when scaling up inference tasks. This experience deepened my understanding of Python’s threading and multiprocessing modules and their application in real-time data processing. Moreover, by integrating *Hugging Face* models with Intel's hardware and software stack, I gained insights into using pre-trained models for efficient inference, ultimately enhancing model performance while using Intel’s powerful AI tools.
 
-This project has solidified my skills in working with *Intel AI solutions* for efficient model inference, optimization, and deployment, while maintaining security and performance standards. It has emphasized the importance of combining cutting-edge AI libraries like *Hugging Face* with *Intel AI Kits* to achieve optimal results in domains like *medical imaging, **computer vision, and **AI-driven diagnostics*.
+This project has solidified my skills in working with Intel AI solutions for efficient model inference, optimization, and deployment, while maintaining security and performance standards. It has emphasized the importance of combining cutting-edge AI libraries like Hugging Face with Intel AI Kits to achieve optimal results in domains like medical imaging, computer vision, and AI-driven diagnostics.
 
 ---
 ---
