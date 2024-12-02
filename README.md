@@ -20,6 +20,10 @@ Intel® AI Hackathon is an AI Readiness focused initiative for next-generation t
 
 Our project focuses on leveraging the **Intel AI technologies** and Deep Learning frameworks to optimize and automate **Medical Image Segmentation** and **Ejection fraction calculation** from Echocardiogram videos. By utilizing **Intel Extension for PyTorch (IPEX)**, we enhanced the performance of **PyTorch models** by running on **Intel CPUs and GPUs**, accelerating both training and inference tasks.
 
+
+<p align="center">
+  <img src="imgs/cardiolenspng.png">
+</p>
 The project integrates **DPT Large model by Intel, DeepLabV3 with ResNet-101, DeepLabV3 with Mobile-NetV3 Large**, for semantic segmentation of medical images, particularly **Left Ventricle Segmentation**, improving the accuracy of heart disease detection.
 
 We used the [Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data) for segmenting the Left ventricle and calculating **Ejection fraction (EF)**, which is critical in diagnosing heart conditions. The model uses a **Transformer-based architecture** (Intel-optimized) that yields high performance, including a **Dice score of 0.795**, offering reliable and timely predictions. The integration of **Hugging Face's pre-trained models** with Intel's hardware acceleration capabilities ensures optimized inference speeds.
@@ -202,6 +206,41 @@ Here's a concise set of instructions you can include in your GitHub repository f
   1. **Cardiac Metrics** : This section introduces you to the project content and describe brielfy about the introduction terms.
   2. **Echo Error Prevention** : This section introduces you about the current problems faced and how this project is going to solve those problems.
   3. **Meet our Team** : This section contains details about the 3 Team members and our mentor. We are thank ful to Mr.Siva lal Sir, ECE HoD for his guidance over our project.
+
+---
+### Website preview: 
+
+1. Video Uploading Page
+
+<p align="center">
+  <img src="imgs/img1.png" width="49%">
+</p>
+
+2. Results after Video Uploading
+
+<p align="center">
+  <img src="imgs/img2.png" width="49%">
+</p>
+
+3. Cardiac Metrics Information
+
+
+<p align="center">
+  <img src="imgs/img3.png" width="49%">
+</p>
+
+4. Problems and Errors in current real world
+
+   
+<p align="center">
+  <img src="imgs/img4.png" width="49%">
+</p>
+
+5. Our Team
+   
+<p align="center">
+  <img src="imgs/img5.png" width="49%">
+</p>
 
 **_Note_** : _Currently the user of backend has been suspended due to cost constraint. We are looking for funding to make our website fully functional._
 
