@@ -174,6 +174,7 @@ Here's a concise set of instructions you can include in your GitHub repository f
 1. **Set Up Frontend:**
    - Open a new terminal and navigate to the frontend directory:
      ```bash
+     cd 'Web Portal'
      cd frontend
      ```
    - Install dependencies:
