@@ -22,7 +22,7 @@ Our project focuses on leveraging the **Intel AI technologies** and Deep Learnin
 
 The project integrates **DPT Large model by Intel, DeepLabV3 with ResNet-101, DeepLabV3 with Mobile-NetV3 Large**, for semantic segmentation of medical images, particularly **Left Ventricle Segmentation**, improving the accuracy of heart disease detection.
 
-We used the [*Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data) for segmenting the Left ventricle and calculating **Ejection fraction (EF), which is critical in diagnosing heart conditions. The model uses a **Transformer-based architecture** (Intel-optimized) that yields high performance, including a **Dice score of 0.795**, offering reliable and timely predictions. The integration of **Hugging Face's pre-trained models** with Intel's hardware acceleration capabilities ensures optimized inference speeds.
+We used the [Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data) for segmenting the Left ventricle and calculating **Ejection fraction (EF)**, which is critical in diagnosing heart conditions. The model uses a **Transformer-based architecture** (Intel-optimized) that yields high performance, including a **Dice score of 0.795**, offering reliable and timely predictions. The integration of **Hugging Face's pre-trained models** with Intel's hardware acceleration capabilities ensures optimized inference speeds.
 
 ## Project Technical Analysis Report
 
