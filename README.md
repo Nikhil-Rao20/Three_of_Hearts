@@ -209,11 +209,11 @@ Here's a concise set of instructions you can include in your GitHub repository f
 ---
 # Contact
 
-**Nikhileswara Rao Sulake**
+**_Nikhileswara Rao Sulake_**
 
-_nikhil01446@gmail.com
+_nikhil01446@gmail.com_
 
-+91 6281128232_
+_+91 6281128232_
 
 
 
