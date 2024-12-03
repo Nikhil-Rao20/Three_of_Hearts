@@ -242,7 +242,7 @@ Here's a concise set of instructions you can include in your GitHub repository f
   <img src="imgs/img5.png" width="49%">
 </p>
 
-**_Note_** : _Currently the user of backend has been suspended due to cost constraint. We are looking for funding to make our website fully functional._
+**_Note_** : _Currently the user of backend has been suspended due to cost constraint. We are looking for funding to make our website fully functional.**We are currently working on the website for the uploading features and backend. We are trying to complete it by 7th December 2024.**_
 
 
 
