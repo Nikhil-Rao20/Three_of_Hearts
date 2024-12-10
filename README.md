@@ -101,7 +101,7 @@ I experimented with DPT Large model by Intel, DeepLabV3 with ResNet-101 and Deep
 | *Time for 1 Epoch (in Sec)*      | 223.613   | 7.064               | 6.6460                |
 
 
-Furthermore, I enhanced my expertise in video segmentation, using Intel's threading and memory management capabilities to improve data transfer speed and CPU utilization for high-performance tasks. By managing output data such as segmentation masks and heartbeat cycle videos using Python’s os and pathlib modules, I optimized the storage of these results. This structured organization streamlined workflows, making it easier to track outputs and maintain reproducibility across experiments.
+Furthermore, I enhanced my expertise in video segmentation, CPU utilization for high-performance tasks. By managing output data such as segmentation masks and heartbeat cycle videos using Python’s os and pathlib modules, I optimized the storage of these results. This structured organization streamlined workflows, making it easier to track outputs and maintain reproducibility across experiments.
 
 I worked on optimizing multiprocessing and parallelization for data handling, resolving issues like semaphore locks and bad file descriptors when scaling up inference tasks. This experience deepened my understanding of Python’s threading and multiprocessing modules and their application in real-time data processing. Moreover, by integrating *Hugging Face* models with Intel's hardware and software stack, I gained insights into using pre-trained models for efficient inference, ultimately enhancing model performance while using Intel’s powerful AI tools.
 
