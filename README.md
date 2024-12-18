@@ -18,7 +18,7 @@ Intel® AI Hackathon is an AI Readiness focused initiative for next-generation t
 
 # *Brief Overview:*
 
-Our project focuses on leveraging the **Intel AI technologies** and Deep Learning frameworks to optimize and automate **Medical Image Segmentation** and **Ejection fraction calculation** from Echocardiogram videos. By utilizing **Intel Extension for PyTorch (IPEX)**, we enhanced the performance of **PyTorch models** by running on **Intel CPUs and GPUs**, accelerating both training and inference tasks.
+Our project focuses on leveraging the **Intel AI technologies** and Deep Learning frameworks to optimize and automate **Medical Image Segmentation** and **Ejection fraction calculation** with **Electrocardiogram** from Echocardiogram videos. By utilizing **Intel Extension for PyTorch (IPEX)**, we enhanced the performance of **PyTorch models** by running on **Intel CPUs and GPUs**, accelerating both training and inference tasks.
 
 
 <p align="center">
@@ -26,7 +26,7 @@ Our project focuses on leveraging the **Intel AI technologies** and Deep Learnin
 </p>
 The project integrates **DPT Large model by Intel, DeepLabV3 with ResNet-101, DeepLabV3 with Mobile-NetV3 Large**, for semantic segmentation of medical images, particularly **Left Ventricle Segmentation**, improving the accuracy of heart disease detection.
 
-We used the [Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data) for segmenting the Left ventricle and calculating **Ejection fraction (EF)**, which is critical in diagnosing heart conditions. The model uses a **Transformer-based architecture** (Intel-optimized) that yields high performance, including a **Dice score of 0.795**, offering reliable and timely predictions. The integration of **Hugging Face's pre-trained models** with Intel's hardware acceleration capabilities ensures optimized inference speeds.
+We used the [Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data) for segmenting the Left ventricle and calculating **Ejection fraction (EF)**, which is critical in diagnosing heart conditions. The model uses a **Transformer-based architecture** (Intel-optimized) that yields high performance, including a **Dice score of 0.78**, offering reliable and timely predictions. The integration of **Hugging Face's pre-trained models** with Intel's hardware acceleration capabilities ensures optimized inference speeds.
 
 ## Project Technical Analysis Report
 
@@ -66,10 +66,10 @@ The user interface enables healthcare professionals to easily upload Echocardiog
 
 ### 2. *Python Libraries Used and it's case scenarios:*
 
-- **Intel Extension for PyTorch (IPEX):** Optimizes PyTorch models for Intel GPUs.
-- **Pytorch and Intel Optimized Pytorch:** Utilized for loading and running pre-trained models, with support for deep learning operations on Intel hardware.
+- **Pytorch:** Utilized for loading and running pre-trained models, with support for deep learning operations on Intel hardware.
 - **Hugging Face:** For accessing pre-trained models, including those used for image segmentation, and fine-tuning them for specific tasks. We took the Intel DPT Large Model which is pretrained on ADE Dataset.
 - **IPEX:** Used for Optimized training and inference tasks, optimized for Intel architecture.
+- **OpenVINO:** Used for the inference on CPU systems, and proved that OpenVINO is best performing than other two (Pytorch and IPEX optimized)
 - **OpenCV:** For image loading, preprocessing and resizing in the model pipeline, particularly for medical images and video data.
 - **Pandas:** For organizing and managing data, particularly the dataset with patient details and video paths.
 - **NumPy:** For handling numerical data and performing mathematical operations.
@@ -85,9 +85,9 @@ The user interface enables healthcare professionals to easily upload Echocardiog
 
 # What I Learned:
 
-From this experience, I have gained in-depth knowledge of leveraging Intel Libraries, and the powerful combination of Intel hardware acceleration with Hugging Face models for optimized deep learning workflows.
+From this experience, I have gained in-depth knowledge of leveraging Intel Libraries, and the powerful combination of Intel hardware acceleration with Hugging Face models for optimized deep learning workflows. I was very amazed with performance of OpenVINO for inference and IPEX for training. It was nearly 50% reduced from the original traditional method.
 
-I learned how to manage and resolve dependency conflicts while setting up essential libraries like torch, wget, and matplotlib, ensuring a robust environment for executing AI models. By utilizing Intel Extension for PyTorch (IPEX), I enhanced the performance of models running on Intel CPUs and GPUs, accelerating training and inference tasks significantly. Handling deprecation warnings, such as replacing the pretrained parameter with weights in PyTorch, helped me stay updated with the latest framework updates and adapt the code to Intel-optimized workflows.
+I learned how to manage and resolve dependency conflicts while setting up essential libraries like torch, wget, and matplotlib, ensuring a robust environment for executing AI models. By utilizing Intel Extension for PyTorch (IPEX), I enhanced the performance of models running on Intel CPUs and GPUs, accelerating training and inference tasks (with OpenVINO) significantly. Handling deprecation warnings, such as replacing the pretrained parameter with weights in PyTorch, helped me stay updated with the latest framework updates and adapt the code to Intel-optimized workflows.
 
 Working with CUDA allowed me to leverage hardware acceleration to significantly boost the speed of model training and inference, improving both efficiency and scalability.
 
@@ -103,7 +103,7 @@ I experimented with DPT Large model by Intel, DeepLabV3 with ResNet-101 and Deep
 
 Furthermore, I enhanced my expertise in video segmentation, CPU utilization for high-performance tasks. By managing output data such as segmentation masks and heartbeat cycle videos using Python’s os and pathlib modules, I optimized the storage of these results. This structured organization streamlined workflows, making it easier to track outputs and maintain reproducibility across experiments.
 
-I worked on optimizing multiprocessing and parallelization for data handling, resolving issues like semaphore locks and bad file descriptors when scaling up inference tasks. This experience deepened my understanding of Python’s threading and multiprocessing modules and their application in real-time data processing. Moreover, by integrating *Hugging Face* models with Intel's hardware and software stack, I gained insights into using pre-trained models for efficient inference, ultimately enhancing model performance while using Intel’s powerful AI tools.
+Moreover, by integrating *Hugging Face* models with Intel's hardware and software stack, I gained insights into using pre-trained models for efficient inference, ultimately enhancing model performance while using Intel’s powerful AI tools.
 
 This project has solidified my skills in working with Intel AI solutions for efficient model inference, optimization, and deployment, while maintaining security and performance standards. It has emphasized the importance of combining cutting-edge AI libraries like Hugging Face with Intel AI Kits to achieve optimal results in domains like medical imaging, computer vision, and AI-driven diagnostics.
 
@@ -113,7 +113,7 @@ This project has solidified my skills in working with Intel AI solutions for eff
 ## Setup and Configuration for Training Models on EchoNet Dynamic Dataset (Folder : Model Training and Development)
 1. *Dataset Link* : Please download the dataset from kaggle and set the dataset path accordingly. Link : https://www.kaggle.com/datasets/snikhilrao/echonet-dynamic-data
 
-Before starting your training check whether your GPU is enabled or not ie., make sure you will get "True" for torch.cuda.is_available()
+Before starting your training check whether your GPU is enabled or not ie., make sure you will get "True" for torch.cuda.is_available(), if you wish to train the model on GPU or you can continue upon CPU itself.
 
 2. *Dataset Path :*
 
@@ -169,6 +169,31 @@ And change the model accordingly based on your chosen version :
     ```
 You can select any of the above models of your choice and proceed with the instructions given.
 
+## User Experience and Results
+
+The user is required to upload a cardiography video by which they would get the three following results :
+- Left Ventricle Segmented Mask Video overlayed on the input video for better visualization
+- An electrocardiogram video to visualize the heartbeat, so that the user and any specialist can observe the heartbeat and can determine if there are any anomalies.
+- Health Report based on the Ejection Fraction for cause and cure information
+
+
+### Project Video Demonstrations
+
+**Example 1 :**
+<p align="center">
+  <img src="imgs/video1.gif" alt="Input Video" width="200">
+  <img src="imgs/mask1.gif" alt="Mask Video" width="200">
+  <img src="imgs/ecg1.gif" alt="Electrocardiogram" width="200">
+</p>
+
+**Example 2 :**
+<p align="center">
+  <img src="imgs/video2.gif" alt="Input Video" width="200">
+  <img src="imgs/mask2.gif" alt="Mask Video" width="200">
+  <img src="imgs/ecg2.gif" alt="Electrocardiogram" width="200">
+</p>
+
+
 ## Web Interface Instructions
 Here's a concise set of instructions you can include in your GitHub repository for running the website after cloning the project:
 --
@@ -203,7 +228,7 @@ Here's a concise set of instructions you can include in your GitHub repository f
 
 **Additional Features** (Sections in sidebar):
 
-  1. **Cardiac Metrics** : This section introduces you to the project content and describe brielfy about the introduction terms.
+  1. **Cardiac Metrics** : This section introduces you to the project content and describes briefly about the introduction terms.
   2. **Echo Error Prevention** : This section introduces you about the current problems faced and how this project is going to solve those problems.
   3. **Meet our Team** : This section contains details about the 3 Team members and our mentor. We are thank ful to Mr.Siva lal Sir, ECE HoD for his guidance over our project.
 
