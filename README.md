@@ -22,7 +22,7 @@ Our project focuses on leveraging the **Intel AI technologies** and Deep Learnin
 
 
 <p align="center">
-  <img src="imgs/bloack">
+  <img src="imgs/blockdiagram.png">
 </p>
 The project integrates **DPT Large model by Intel, DeepLabV3 with ResNet-101, DeepLabV3 with Mobile-NetV3 Large**, for semantic segmentation of medical images, particularly **Left Ventricle Segmentation**, improving the accuracy of heart disease detection.
 
