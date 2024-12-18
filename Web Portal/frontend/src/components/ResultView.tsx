@@ -1,70 +1,117 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LoadingAnimation } from './LoadingAnimation';
 import { CardiacMetrics } from './CardiacMetrics';
 import { DiagnosisSection } from './DiagnosisSection';
 import { HeartVideo } from './HeartVideo';
 
-import mask1 from "/public/mask1.mp4";
-import mask2 from "/public/mask2.mp4";
-import mask3 from "/public/mask3.mp4";
-import mask4 from "/public/mask4.mp4";
-
-
 interface ResultViewProps {
   inputVideo: string;
   outputVideo: string | null;
   isProcessing: boolean;
-  order:number;
+  order: number;
+  analysisResult: {
+    ejectionFraction: number;
+    problem: string;
+    cause: string;
+    cure: string;
+  } | null;
 }
 
-export function ResultView({ inputVideo, outputVideo, isProcessing,order }: ResultViewProps) {
+export function ResultView({ 
+  inputVideo, 
+  outputVideo, 
+  isProcessing, 
+  order,
+  analysisResult 
+}: ResultViewProps) {
   const inputVideoRef = useRef<HTMLVideoElement>(null);
-  const outputVideoRef = useRef<HTMLVideoElement>(null);
-
-  const [ov,setOv] = useState("");
+  const outputVideoRef1 = useRef<HTMLVideoElement>(null);
+  const outputVideoRef2 = useRef<HTMLVideoElement>(null);
+  const [maskVideo, setMaskVideo] = useState<string | null>(null);
+  const [ecgVideo, setEcgVideo] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAndConvertVideo = async (videoPath: string) => {
-      try {
-        setOv(videoPath)
-      } catch (error) {
-        return "";
-      }
-    };
-
-    if(order===1){
-      fetchAndConvertVideo(mask1)
-    }else if(order === 2){
-      fetchAndConvertVideo(mask2)
-    }else if(order === 3){
-      fetchAndConvertVideo(mask3)
-    }else if(order === 4){
-      fetchAndConvertVideo(mask4)
-    }else{
-      fetchAndConvertVideo(mask1)
+    if (isProcessing) {
+      if (maskVideo) URL.revokeObjectURL(maskVideo);
+      if (ecgVideo) URL.revokeObjectURL(ecgVideo);
+      setMaskVideo(null);
+      setEcgVideo(null);
+      return;
     }
 
-  },[order])
+    if (!isProcessing && analysisResult) {
+      const fetchVideos = async () => {
+        try {
+          // Fetch mask video
+          const maskResponse = await fetch(`http://127.0.0.1:5000/get-video/mask`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'video/mp4',
+            },
+          });
+          
+          if (!maskResponse.ok) {
+            throw new Error('Failed to fetch mask video');
+          }
+
+          const maskBlob = await maskResponse.blob();
+          const maskUrl = URL.createObjectURL(maskBlob);
+          setMaskVideo(maskUrl);
+
+          // Fetch ECG video
+          const ecgResponse = await fetch(`http://127.0.0.1:5000/get-video/ecg`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'video/mp4',
+            },
+          });
+          
+          if (!ecgResponse.ok) {
+            throw new Error('Failed to fetch ECG video');
+          }
+
+          const ecgBlob = await ecgResponse.blob();
+          const ecgUrl = URL.createObjectURL(ecgBlob);
+          setEcgVideo(ecgUrl);
+        } catch (error) {
+          console.error('Error fetching videos:', error);
+        }
+      };
+
+      fetchVideos();
+    }
+
+    return () => {
+      if (maskVideo) URL.revokeObjectURL(maskVideo);
+      if (ecgVideo) URL.revokeObjectURL(ecgVideo);
+    };
+  }, [isProcessing, analysisResult]);
 
   useEffect(() => {
     const inputVid = inputVideoRef.current;
-    const outputVid = outputVideoRef.current;
+    const outputVid1 = outputVideoRef1.current;
+    const outputVid2 = outputVideoRef2.current;
 
-    if (!inputVid || !outputVid || !outputVideo) return;
+    if (!inputVid || !outputVid1 || !outputVid2 || !maskVideo || !ecgVideo) return;
 
     const handlePlay = () => {
       inputVid.play().catch(console.error);
-      outputVid.play().catch(console.error);
+      outputVid1.play().catch(console.error);
+      outputVid2.play().catch(console.error);
     };
 
     const handlePause = () => {
       inputVid.pause();
-      outputVid.pause();
+      outputVid1.pause();
+      outputVid2.pause();
     };
 
     const handleTimeUpdate = () => {
-      if (Math.abs(inputVid.currentTime - outputVid.currentTime) > 0.1) {
-        outputVid.currentTime = inputVid.currentTime;
+      if (Math.abs(inputVid.currentTime - outputVid1.currentTime) > 0.1) {
+        outputVid1.currentTime = inputVid.currentTime;
+      }
+      if (Math.abs(inputVid.currentTime - outputVid2.currentTime) > 0.1) {
+        outputVid2.currentTime = inputVid.currentTime;
       }
     };
 
@@ -77,35 +124,21 @@ export function ResultView({ inputVideo, outputVideo, isProcessing,order }: Resu
       inputVid.removeEventListener('pause', handlePause);
       inputVid.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [inputVideo, outputVideo]);
+  }, [inputVideo, maskVideo, ecgVideo]);
 
-  const [ejectionFraction,setEjectionFraction] = useState(0);
   const endDiastolicVolume = 134.44;
   const endSystolicVolume = 73.28;
 
-  useEffect(() => {
-    if(order === 1){
-      setEjectionFraction(50.49531)
-    }else if(order === 2){
-      setEjectionFraction(60.141945)
-    }else if(order === 3){
-      setEjectionFraction(39.860498)
-    }else{
-      setEjectionFraction(65.74631)
-    }
-    console.log(order)
-  },[order]);
-
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-2 gap-8">
-        <div className="space-y-2">
+      <div className="flex justify-center gap-8">
+        <div className="w-1/2 space-y-2 ">
           <h3 className="font-medium text-gray-700">Input Video</h3>
-          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative overflow-hidden bg-gray-100 rounded-lg aspect-video">
             <video
               ref={inputVideoRef}
               src={inputVideo}
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 object-contain w-full h-full"
               controls
               autoPlay
               loop
@@ -114,16 +147,43 @@ export function ResultView({ inputVideo, outputVideo, isProcessing,order }: Resu
             />
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-8">
         <div className="space-y-2">
-          <h3 className="font-medium text-gray-700">Segmentation Result</h3>
-          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+          <h3 className="font-medium text-gray-700">Segmented Video</h3>
+          <div className="relative overflow-hidden bg-gray-100 rounded-lg aspect-video">
             {isProcessing ? (
               <LoadingAnimation />
-            ) : outputVideo ? (
+            ) : maskVideo ? (
               <video
-                ref={outputVideoRef}
-                src={ov}
-                className="absolute inset-0 w-full h-full object-contain"
+                ref={outputVideoRef1}
+                src={maskVideo}
+                className="absolute inset-0 object-contain w-full h-full"
+                controls
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                Click "Process Video" to start
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="font-medium text-gray-700">ECG Video</h3>
+          <div className="relative overflow-hidden bg-gray-100 rounded-lg aspect-video">
+            {isProcessing ? (
+              <LoadingAnimation />
+            ) : ecgVideo ? (
+              <video
+                ref={outputVideoRef2}
+                src={ecgVideo}
+                className="absolute inset-0 object-contain w-full h-full"
                 controls
                 autoPlay
                 loop
@@ -139,14 +199,21 @@ export function ResultView({ inputVideo, outputVideo, isProcessing,order }: Resu
         </div>
       </div>
       
-      {outputVideo && !isProcessing && (
+      {!isProcessing && analysisResult && (
         <>
-          <CardiacMetrics 
-            ejectionFraction={ejectionFraction}
-            endDiastolicVolume={endDiastolicVolume}
-            endSystolicVolume={endSystolicVolume}
+          <div className="w-1/3">
+            <CardiacMetrics 
+              ejectionFraction={analysisResult.ejectionFraction}
+              endDiastolicVolume={endDiastolicVolume}
+              endSystolicVolume={endSystolicVolume}
+            />
+          </div>
+          <DiagnosisSection 
+            ejectionFraction={analysisResult.ejectionFraction}
+            problem={analysisResult.problem}
+            cause={analysisResult.cause}
+            cure={analysisResult.cure}
           />
-          <DiagnosisSection ejectionFraction={ejectionFraction} />
           <HeartVideo />
         </>
       )}

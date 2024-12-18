@@ -1,0 +1,8 @@
+wget
+torch
+tqdm
+os
+typing
+matplotlib
+numpy
+opencv-python

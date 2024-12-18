@@ -1,3 +1,8 @@
+
+
+import warnings
+warnings.filterwarnings('ignore')
+from flask import Flask, send_file
 import wget
 import torch
 import tqdm
@@ -7,7 +12,7 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
-
+import openvino as ov
 
 def loadvideo(filename: str) -> np.ndarray:
     if not os.path.exists(filename):
@@ -27,18 +32,68 @@ def loadvideo(filename: str) -> np.ndarray:
     return v
 
 
+
 def savevideo(filename: str, array: np.ndarray, fps: typing.Union[float, int] = 1):
-    c, _, height, width = array.shape
+    """
+    Save a numpy array as a video file.
+    
+    Args:
+        filename (str): Output video filename (should end with .avi)
+        array (np.ndarray): Input array of shape (3, frames, height, width)
+        fps (float or int): Frames per second for the output video
+    """
+    # Ensure the input array has the correct shape
+    if len(array.shape) != 4:
+        raise ValueError(f"Expected 4D array, got shape {array.shape}")
+    
+    c, frames, height, width = array.shape
     if c != 3:
-        raise ValueError("savevideo expects array of shape (channels=3, frames, height, width), got shape ({})".format(", ".join(map(str, array.shape))))
-    fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+        raise ValueError(f"Expected 3 channels, got {c} channels")
+    
+    # Ensure array is in the correct data type range [0, 255]
+    if array.dtype != np.uint8:
+        # If float array in range [0, 1], convert to [0, 255]
+        if array.dtype in [np.float32, np.float64] and array.max() <= 1.0:
+            array = (array * 255).astype(np.uint8)
+        else:
+            array = array.astype(np.uint8)
+    
+    # Initialize the video writer with MJPEG codec
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(filename, fourcc, fps, (width, height))
-    for frame in array.transpose((1, 2, 3, 0)):
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        out.write(frame)
-
-
-
+    
+    if not out.isOpened():
+        raise RuntimeError(f"Failed to create video writer for {filename}")
+    
+    try:
+        # Transpose array to (frames, height, width, channels) format
+        array = np.transpose(array, (1, 2, 3, 0))
+        
+        for i in range(frames):
+            # Get the current frame
+            frame = array[i].copy()  # Create a copy to ensure memory contiguity
+            
+            # Convert RGB to BGR color space
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            
+            # Ensure frame is contiguous and in the correct format
+            if not frame_bgr.flags['C_CONTIGUOUS']:
+                frame_bgr = np.ascontiguousarray(frame_bgr)
+            
+            # Write the frame
+            success = out.write(frame_bgr)
+            if not success:
+                print(f"Warning: Failed to write frame {i}")
+                
+    except Exception as e:
+        raise RuntimeError(f"Error while saving video: {str(e)}")
+    
+    finally:
+        # Always release the video writer
+        out.release()
+        
+    print(f"Successfully saved video to {filename}")
+    return True
 
 def bootstrap(a, b, func, samples=10000):
     a = np.array(a)
@@ -327,11 +382,10 @@ def get_mean_and_std(dataset: torch.utils.data.Dataset,
     std = std.astype(np.float32)
 
     return mean, std
+def ov_ef_run_epoch(model, dataloader, train, optim, device, save_all=False, block_size=None):
 
-def ef_run_epoch(model, dataloader, train, optim, device, save_all=False, block_size=None):
 
-
-    model.train(train)
+    # model.train(train)
 
     total = 0  # total training loss
     n = 0      # number of videos processed
@@ -362,18 +416,19 @@ def ef_run_epoch(model, dataloader, train, optim, device, save_all=False, block_
                 if block_size is None:
                     outputs = model(X)
                 else:
-                    outputs = torch.cat([model(X[j:(j + block_size), ...]) for j in range(0, X.shape[0], block_size)])
+                    outputs = np.concatenate([model(X[j:(j + block_size), ...])[0] for j in range(0, X.shape[0], block_size)])
 
+                print(outputs[0].dtype)
                 if save_all:
-                    yhat.append(outputs.view(-1).to("cpu").detach().numpy())
+                    yhat.append(outputs.flatten())
 
                 if average:
                     outputs = outputs.view(batch, n_clips, -1).mean(1)
 
                 if not save_all:
-                    yhat.append(outputs.view(-1).to("cpu").detach().numpy())
+                    yhat.append(outputs.view(-1))
 
-                loss = torch.nn.functional.mse_loss(outputs.view(-1), outcome.type(torch.float32))
+                loss = torch.nn.functional.mse_loss(torch.from_numpy(np.array(outputs[0]).flatten()), outcome.type(torch.float32))
 
                 if train:
                     optim.zero_grad()
@@ -392,6 +447,8 @@ def ef_run_epoch(model, dataloader, train, optim, device, save_all=False, block_
 
     return total / n, yhat, y
 
+
+
 def collate_fn(x):
     x, f = zip(*x)
     i = list(map(lambda t: t.shape[1], x))
@@ -403,21 +460,23 @@ def collate_fn(x):
 frames = 32
 period = 1 #2
 batch_size = 20
-ef_model = torchvision.models.video.r2plus1d_18(pretrained=False)
-ef_model.fc = torch.nn.Linear(ef_model.fc.in_features, 1)
-device = torch.device("cpu")
-checkpoint = torch.load('models/r2plus1d_18_32_2_pretrained.pt', map_location = "cpu")
-state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
-ef_model.load_state_dict(state_dict_cpu)
+def get_pretrained_model():
+    ef_model = torchvision.models.video.r2plus1d_18(pretrained=False)
+    ef_model.fc = torch.nn.Linear(ef_model.fc.in_features, 1)
+    device = torch.device("cpu")
+    checkpoint = torch.load('models/r2plus1d_18_32_2_pretrained.pt', map_location = "cpu")
+    state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
+    ef_model.load_state_dict(state_dict_cpu)
 
-seg_model = torchvision.models.segmentation.deeplabv3_resnet101(pretrained=True)
-seg_model.classifier[-1] = torch.nn.Conv2d(seg_model.classifier[-1].in_channels, 1, kernel_size=seg_model.classifier[-1].kernel_size)
+    seg_model = torchvision.models.segmentation.deeplabv3_resnet101(pretrained=True)
+    seg_model.classifier[-1] = torch.nn.Conv2d(seg_model.classifier[-1].in_channels, 1, kernel_size=seg_model.classifier[-1].kernel_size)
 
-checkpoint = torch.load('models/DeeplabV3 Resnet101 Best.pt', map_location = "cpu")
-state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
-seg_model.load_state_dict(state_dict_cpu)
+    checkpoint = torch.load('models/DeeplabV3 Resnet101 Best.pt', map_location = "cpu")
+    state_dict_cpu = {k[7:]: v for (k, v) in checkpoint['state_dict'].items()}
+    seg_model.load_state_dict(state_dict_cpu)
+    return seg_model, ef_model
 
-
+seg_model, ef_model = get_pretrained_model()
 
 def model_predict(seg_model,ef_model, video_seg_folder, device=("cuda" if torch.cuda.is_available() else 'cpu')):
     mean = np.array([45.851063, 45.81058,  45.800232])
@@ -429,7 +488,7 @@ def model_predict(seg_model,ef_model, video_seg_folder, device=("cuda" if torch.
           }
 
     ds = Echo(split="external_test", external_test_location = video_seg_folder, target_type=["Filename"], **kwargs)
-    dataloader = torch.utils.data.DataLoader(ds,batch_size=1, num_workers=0, shuffle=False, pin_memory=(device == "cuda"), collate_fn=collate_fn)
+    dataloader = torch.utils.data.DataLoader(ds,batch_size=1, num_workers=2, shuffle=False, pin_memory=(device == device), collate_fn=collate_fn)
     block = 1024
     seg_model.eval()
     ef_model.eval()
@@ -439,15 +498,60 @@ def model_predict(seg_model,ef_model, video_seg_folder, device=("cuda" if torch.
         for (z, f, i) in tqdm.tqdm(dataloader):
             z = z.to(device)
             y_out = np.concatenate([seg_model(z[i:(i + block), :, :, :])["out"].detach().cpu().numpy() for i in range(0, z.shape[0], block)]).astype(np.float16)
-            print("Y shape: ",y_out.shape)
-            print("X Shape :", z.shape)
+          
     ds = Echo(split = "external_test", external_test_location = video_seg_folder, target_type=["EF"], **kwargs)
 
-    test_dataloader = torch.utils.data.DataLoader(ds, batch_size = 1, num_workers = 5, shuffle = True, pin_memory=(device == "cuda"))
+    test_dataloader = torch.utils.data.DataLoader(ds, batch_size = 1, num_workers = 2, shuffle = True, pin_memory=(device == device))
 
-    loss, yhat, y = ef_run_epoch(ef_model, test_dataloader, False, None, device, save_all=True, block_size=25)
-
+    loss, yhat, y = ov_ef_run_epoch(ef_model, test_dataloader, False, None, device, save_all=True, block_size=25)
+    print("Ejection Fraction :",yhat[0][0])
     return y_out, yhat[0][0]
+
+
+def ov_model_predict(seg_model,ef_model, video_seg_folder, device='cpu'):
+    mean = np.array([45.851063, 45.81058,  45.800232])
+    std = np.array([53.756863, 53.732307 ,53.68092 ])
+    kwargs = {"mean": mean,
+          "std": std,
+          "length": None,
+          "period": 1,
+          }
+
+    ds = Echo(split="external_test", external_test_location = video_seg_folder, target_type=["Filename"], **kwargs)
+    dataloader = torch.utils.data.DataLoader(ds,batch_size=1, num_workers=0, shuffle=False, pin_memory=(device == device), collate_fn=collate_fn)
+    block = 1024
+    with torch.no_grad():
+        for (z, f, i) in tqdm.tqdm(dataloader):
+            z = z.to(device)
+            y_out = np.concatenate([seg_model(z[i:(i + block), :, :, :])["out"] for i in range(0, z.shape[0], block)]).astype(np.float16)
+
+    ds = Echo(split = "external_test", external_test_location = video_seg_folder, target_type=["EF"], **kwargs)
+
+    test_dataloader = torch.utils.data.DataLoader(ds, batch_size = 1, num_workers = 2, shuffle = True, pin_memory=(device == device))
+
+    loss, yhat, y = ov_ef_run_epoch(ef_model, test_dataloader, False, None, device, save_all=True, block_size=25)
+    return y_out, yhat[0][0]
+
+
+def ecg_diagram(y, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
+    logit = y[:, 0, :, :]
+    size = (logit > 0).sum(axis=(1, 2))
+    size = (size - size.min()) / (size.max() - size.min())
+    size = 1 - size  
+    video = np.zeros((len(size), 3, 112, 112), dtype=np.uint8)
+    
+    for f, s in enumerate(size):
+        video[:, :, int(round(5 + 100 * s)), int(round(f / len(size) * 100 + 8))] = 255
+        r, c = skimage.draw.disk((int(round(5 + 100 * s)), int(round(f / len(size) * 100 + 8))), 4.1)
+        video[f, :, r, c] = 255
+
+    video = video.transpose(1, 0, 2, 3)
+    video = video.astype(np.uint8)
+
+    video_path = os.path.join(output_dir, "ecg.mp4")
+    savevideo(video_path, video, 50)
 
 
 
@@ -468,6 +572,7 @@ def save_mask(y,model, video_seg_folder, output_folder):
 
             # Create a mask video frame
             mask_img = img.astype(np.uint8)
+            print("Final mask shape :", mask_img.shape)
 
             savevideo(os.path.join(f"{output_folder}/mask.mp4"), mask_img, 50)
         
@@ -488,25 +593,42 @@ def get_diagnosis(ef_value):
         cause = "An EF of 75% or higher can indicate hypertrophic cardiomyopathy (HCM), where the heart muscle thickens, affecting its ability to relax and fill properly."
         cure = "Treatment involves beta-blockers, calcium channel blockers, and possibly surgical intervention or implantable cardioverter-defibrillators (ICDs) for severe cases."
     
-    return [problem, cause, cure]
+    return [float(ef_value),problem, cause, cure]
 
 
 def final_result(seg_model,ef_model, input_folder,output_folder, device=("cuda" if torch.cuda.is_available() else 'cpu')):
-    y_in, ef_out = model_predict(seg_model,ef_model, input_folder, device=device)
+    y_in, ef_out = ov_model_predict(seg_model,ef_model, input_folder, device=device)
+    ecg_diagram(y_in, output_folder)
     save_mask(y_in,seg_model, input_folder, output_folder)
     return get_diagnosis(ef_out)
 
 
+import os
+
+def retain_latest_video(folder_path):
+    # Get a list of all .avi files in the folder
+    avi_files = [f for f in os.listdir(folder_path) if f.endswith('.avi')]
+    
+    if not avi_files:
+        print("No .avi files found in the folder.")
+        return
+    avi_files.sort()
+    most_recent_file = avi_files[-1]
+    for file in avi_files:
+        if file != most_recent_file:
+            os.remove(os.path.join(folder_path, file))
+
 
 from flask import Flask, jsonify, request
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+# CORS(app) 
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}})
 # Set up the static folders for input and output
 INPUT_FOLDER = 'input'
 OUTPUT_FOLDER = 'output'
-
 # Ensure the directories exist
 os.makedirs(INPUT_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -518,31 +640,63 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH')
     return response
 
-@app.route("/video-output", methods=['POST'])
+
+@app.route("/video-output", methods=['GET'])
 def video_output():
     # Check if the request has a file
-    if 'video' not in request.files:
-        return jsonify({"error": "No video file provided"}), 400
-    
-    
-    video_file = request.files['video']
-    
-    # Save the video to the input folder
-    
-    input_path = os.path.join(INPUT_FOLDER, video_file.filename)
-    video_file.save(input_path)
-    
-    # Call your processing function (assuming seg_model and ef_model are defined)
+    out_files = [f for f in os.listdir(OUTPUT_FOLDER)]
+    for file in out_files:
+        os.remove(os.path.join(OUTPUT_FOLDER, file))
+    print(os.listdir(OUTPUT_FOLDER))
+    retain_latest_video(INPUT_FOLDER)
+    print("Redundant videos deleted")
+
     try:
+        print("Model started")
         res = final_result(seg_model, ef_model, INPUT_FOLDER, OUTPUT_FOLDER)
+        print("Model ended")
     except Exception as e:
         return jsonify({"error": f"Processing failed: {str(e)}"}), 500
-    # finally:
-    #     if os.path.exists(input_path):
-    #         os.remove(input_path)
-
+    print(res)
+    
+    
     return jsonify(res)
+
+@app.route('/get-video/mask', methods=['GET'])
+def get_video_mask():
+    try:
+        # Path to your .avi file
+        video_path = './output/mask.mp4'
+        print(" video path status", os.path.exists(video_path))
+        
+        # Serve the file using send_file
+        return send_file(
+            video_path,
+            as_attachment=False,  # Set to False to display in browser
+            mimetype='video/mp4',  # MIME type for .avi files
+        )
+    except Exception as e:
+        return str(e), 500
+    
+@app.route('/get-video/ecg', methods=['GET'])
+def get_video_ecg():
+    try:
+        # Path to your .avi file
+        video_path = './output/ecg.mp4'
+        print(" video path status", os.path.exists(video_path))
+        
+        # Serve the file using send_file
+        return send_file(
+            video_path,
+            as_attachment=False,  # Set to False to display in browser
+            mimetype='video/mp4'  # MIME type for .avi files
+        )
+    except Exception as e:
+        return str(e), 500
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
