@@ -193,6 +193,18 @@ The user is required to upload a cardiography video by which they would get the 
   <img src="imgs/ecg2.gif" alt="Electrocardiogram" width="200">
 </p>
 
+## Intel vs Pytorch Comparison
+
+I have experimented with over 10 random videos from test data and here are the comparison of the results based on the inference time (in seconds). These results are produced on CPU device (Intel i7 12th Gen 12650H ~2.7GHz)
+
+
+**Task 1 : Segmentation**
+<img src="imgs/seg.png" alt="Segmentation Comparison">
+
+
+**Task 2 : Ejection Fraction Calculation**
+<img src="imgs/ef.png" alt="Ejection Fraction Comparison">
+
 
 ## Web Interface Instructions
 Here's a concise set of instructions you can include in your GitHub repository for running the website after cloning the project:
