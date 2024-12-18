@@ -279,9 +279,9 @@ Here's a concise set of instructions you can include in your GitHub repository f
   <img src="imgs/img5.png" width="49%">
 </p>
 
-**_Note_** : _Currently the user of backend has been suspended due to cost constraint. We are looking for funding to make our website fully functional.**We are currently working on the website for the uploading features and backend. We are trying to complete it by 7th December 2024.**_
+**_Note_** : _Currently the user of backend has been suspended due to cost constraint. We are looking for funding to make our website fully functional.**We are currently working on the website for the uploading features and backend.**_
 
-**_Note_** : _The web interface part is about to be complete. The backend part is completed but we are facing in the frontend. Looking forward to solve it._
+**_Note_** : _The web interface part is about to be complete. The backend part is completed but we are facing in the frontend. Looking forward to solve it. 18th December 2024_
 
 
 
