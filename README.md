@@ -55,7 +55,7 @@ We used the [Echonet Dynamic Dataset](https://www.kaggle.com/datasets/snikhilrao
 
 
 
-The user interface enables healthcare professionals to easily upload Echocardiogram videos, generating accurate segmentation masks and disease predictions in real-time. Through the use of *Intel AI Kits* and optimization techniques, the project addresses key challenges in manual tasks and diagnostic workflows, aiding clinicians and students in heart disease detection with AI-powered solutions.
+The user interface enables healthcare professionals to easily upload Echocardiogram videos, generating accurate segmentation masks and disease predictions in real-time along with Electrocardiogram video for heart beat analysis. Through the use of *Intel AI Kits* and optimization techniques, the project addresses key challenges in manual tasks and diagnostic workflows, aiding clinicians and specialists in heart disease detection with AI-powered solutions. We aim to help the clinician, specialists and cardiographers in aiding the decisions with accurate disease using AI. 
 
 ---
 
