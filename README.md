@@ -196,7 +196,7 @@ The user is required to upload a cardiography video by which they would get the 
 
 ## Intel vs Pytorch Comparison
 
-I have experimented with over 10 random videos from test data and here are the comparison of the results based on the inference time (in seconds). These results are produced on CPU device (Intel i7 12th Gen 12650H ~2.7GHz)
+I have experimented with over 10 random videos from test data and here is the comparison of the results based on the inference time (in seconds). These results are produced on CPU device (Intel i7 12th Gen 12650H ~2.7GHz). By experimentation, we confirm that for the two tasks (segmentation and ejection fraction) the OpenVINO is working best for inference, and for training we are using the IPEX library to optimize. This optimization not only reduces the time period of training and inference but also reduces the use of computational resources which are costly at this time.
 
 
 **Task 1 : Segmentation**
